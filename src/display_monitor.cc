@@ -14,6 +14,7 @@
 #include "geometry.h"
 #include "input.h"
 #include "interface.h"
+#include "jtext.h"
 #include "memory.h"
 #include "settings.h"
 #include "svga.h"
@@ -256,6 +257,41 @@ void displayMonitorAddMessage(const char* str)
         }
     }
 
+    // nettoge.com: Japanese line breaking (kinsoku, no spaces needed).
+    if (jtext_active()) {
+        const char* pos = str;
+        while (*pos != '\0') {
+            int next;
+            int lineLength = jtext_fit(pos, DISPLAY_MONITOR_WIDTH - _max_disp - knobWidth, &next);
+            if (next <= 0) {
+                next = 1;
+                lineLength = 1;
+            }
+
+            char* temp = gDisplayMonitorLines[_disp_start];
+            int length;
+            if (knob != '\0') {
+                *temp++ = knob;
+                length = DISPLAY_MONITOR_LINE_LENGTH - 2;
+                knob = '\0';
+                knobWidth = 0;
+            } else {
+                length = DISPLAY_MONITOR_LINE_LENGTH - 1;
+            }
+            if (lineLength > length) {
+                lineLength = length;
+            }
+            memcpy(temp, pos, lineLength);
+            temp[lineLength] = '\0';
+            _disp_start = (_disp_start + 1) % gDisplayMonitorLinesCapacity;
+            pos += next;
+        }
+
+        fontSetCurrent(oldFont);
+        _disp_curr = _disp_start;
+        displayMonitorRefresh();
+        return;
+    }
     std::string mutableMessage(str);
     char* mutableStr = mutableMessage.data();
 

@@ -28,6 +28,7 @@
 #include "interface.h"
 #include "inventory.h"
 #include "item.h"
+#include "jtext.h"
 #include "kb.h"
 #include "lips.h"
 #include "map.h"
@@ -144,7 +145,8 @@ typedef struct GameDialogOptionEntry {
     int proc;
     int btn;
     int top;
-    char text[900];
+    // nettoge.com: 900 -> 2700 (UTF-8 Japanese uses 3 bytes per character).
+    char text[2700];
     int bottom;
 } GameDialogOptionEntry;
 
@@ -674,7 +676,8 @@ static int dialogReplyTextOffset;
 // important role.
 //
 // 0x58F4E4 destination
-static char dialogReplyText[900];
+// nettoge.com: 900 -> 2700 (UTF-8 Japanese uses 3 bytes per character).
+static char dialogReplyText[2700];
 
 // 0x58FF70
 static GameDialogOptionEntry dialogOptionEntries[DIALOG_OPTION_ENTRIES_CAPACITY];
@@ -3403,6 +3406,55 @@ static int gameDialogDrawText(unsigned char* buffer, Rect* rect, const char* str
     }
 
     int maxWidth = rect->right - rect->left;
+
+    // nettoge.com: Japanese line breaking (kinsoku, no spaces needed).
+    if (jtext_active()) {
+        while (start != nullptr && *start != '\0') {
+            int next;
+            // The first line of a reply is drawn 10 pixels to the right.
+            int indent = (draw != 1 || start == mutableText) ? 10 : 0;
+            int lineLength = jtext_fit(start, maxWidth - indent, &next);
+            if (next <= 0) {
+                next = 1;
+                lineLength = 1;
+            }
+
+            if (rect->bottom - fontGetLineHeight() < rect->top) {
+                return rect->top;
+            }
+
+            if (draw != 0) {
+                char line[1024];
+                if (lineLength > (int)sizeof(line) - 1) {
+                    lineLength = sizeof(line) - 1;
+                }
+                memcpy(line, start, lineLength);
+                line[lineLength] = '\0';
+
+                unsigned char* dest;
+                if (draw != 1 || start == mutableText) {
+                    dest = buffer + 10;
+                } else {
+                    dest = buffer;
+                }
+                fontDrawText(dest + pitch * rect->top, line, maxWidth, pitch, color);
+            }
+
+            if (textOffset != nullptr) {
+                *textOffset += next;
+            }
+
+            rect->top += height;
+            start += next;
+        }
+
+        if (textOffset != nullptr) {
+            *textOffset = 0;
+        }
+
+        return rect->top;
+    }
+
     char* end = nullptr;
     while (start != nullptr && *start != '\0') {
         if (fontGetStringWidth(start) > maxWidth) {

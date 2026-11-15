@@ -1147,6 +1147,30 @@ Window* windowGetWindow(int win)
 
 // win_get_buf
 // 0x4D78B0
+// nettoge.com: the end of the window buffer that holds ptr, or nullptr. The
+// Japanese text layer (jtext.cc) uses it so that 12 px glyphs never write past
+// the bottom of a window laid out for 10 px fonts.
+unsigned char* windowBufferEndContaining(unsigned char* ptr)
+{
+    if (!gWindowSystemInitialized) {
+        return nullptr;
+    }
+
+    for (int index = 0; index < gWindowsLength; index++) {
+        Window* window = gWindows[index];
+        if (window == nullptr || window->buffer == nullptr) {
+            continue;
+        }
+
+        unsigned char* end = window->buffer + window->width * window->height;
+        if (ptr >= window->buffer && ptr < end) {
+            return end;
+        }
+    }
+
+    return nullptr;
+}
+
 unsigned char* windowGetBuffer(int win)
 {
     Window* window = windowGetWindow(win);

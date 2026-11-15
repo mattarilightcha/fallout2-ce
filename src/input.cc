@@ -16,6 +16,7 @@
 #include "movie.h"
 #include "sfall_kb_helpers.h"
 #include "sfall_script_hooks.h"
+#include "ntg_shoot.h"
 #include "svga.h"
 #include "text_font.h"
 #include "touch.h"
@@ -226,7 +227,12 @@ void _process_bk()
 
     tickersExecute();
 
+#ifdef NTG_SHOOT
+    // nettoge.com shoot build: command files drive a simulated mouse.
+    shoot_tick();
+#else
     _mouse_info();
+#endif
 
     v1 = _win_check_all_buttons();
     if (v1 != -1) {
@@ -381,6 +387,17 @@ void tickersDisable()
 {
     gRunLoopDisabled = true;
 }
+
+#ifdef NTG_SHOOT
+// nettoge.com shoot build: dump the screen with the given writer.
+void shoot_dump_screen(ScreenshotHandler* func)
+{
+    ScreenshotHandler* old = gScreenshotHandler;
+    gScreenshotHandler = func;
+    takeScreenshot();
+    gScreenshotHandler = old;
+}
+#endif
 
 // 0x4C8F4C
 void takeScreenshot()
@@ -1055,9 +1072,12 @@ void _GNW95_process_message()
                 audioEngineResume();
                 break;
             case SDL_WINDOWEVENT_FOCUS_LOST:
+#ifndef NTG_SHOOT
+                // nettoge.com shoot build keeps running without focus.
                 gProgramIsActive = false;
                 mouseDeviceInitMode();
                 audioEnginePause();
+#endif
                 break;
             }
             break;

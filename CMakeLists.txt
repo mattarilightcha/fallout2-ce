@@ -2,7 +2,14 @@ cmake_minimum_required(VERSION 3.18)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
-set(EXECUTABLE_NAME fallout2-ce)
+# nettoge.com: -DNTG_SHOOT=ON builds the development / screenshot build
+# (fallout2-ce-shoot, see src/ntg_shoot.h). The default is the play build.
+option(NTG_SHOOT "nettoge.com development / screenshot build" OFF)
+if(NTG_SHOOT)
+    set(EXECUTABLE_NAME fallout2-ce-shoot)
+else()
+    set(EXECUTABLE_NAME fallout2-ce)
+endif()
 
 if(APPLE)
     if(IOS)
@@ -247,6 +254,10 @@ set(FALLOUT_ENGINE_SOURCES
     "src/string_parsers.h"
     "src/svga.cc"
     "src/svga.h"
+    "src/jtext.cc"
+    "src/jtext.h"
+    "src/ntg_shoot.cc"
+    "src/ntg_shoot.h"
     "src/text_font.cc"
     "src/text_font.h"
     "src/text_object.cc"
@@ -779,4 +790,8 @@ endif()
 if(CMAKE_SYSTEM_NAME MATCHES "Emscripten")
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+endif()
+
+if(NTG_SHOOT)
+    target_compile_definitions(${EXECUTABLE_NAME} PUBLIC NTG_SHOOT)
 endif()

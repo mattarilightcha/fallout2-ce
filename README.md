@@ -1,3 +1,43 @@
+# Fallout 2: Community Engine 日本語化（nettoge.com の改造版）
+
+**This software has been modified by nettoge.com.** This is a fork of [Fallout 2: Community Engine](https://github.com/fallout2-ce/fallout2-ce) (FOR:CE, itself a fork of [Fallout 2 Community Edition](https://github.com/alexbatalov/fallout2-ce) by alexbatalov) that draws Japanese text. It is not made or endorsed by the original authors, Bethesda Softworks or Interplay.
+
+Fallout 2（Steam 版）を日本語で遊ぶための、Fallout 2: Community Engine の改造版です。日本語の文・フォント・画面の絵は [Releases](https://github.com/mattarilightcha/fallout2-ce/releases) の zip に入っています。入れ方と解説は [nettoge.com](https://nettoge.com/) の記事にあります。
+
+1.00 までは alexbatalov/fallout2-ce を元にしていました（枝 `japanese`）。1.10 からは、更新の続いている Fallout 2: Community Engine を元にしています（枝 `japanese-forcece`）。
+
+## 入れ方
+
+1. [Releases](https://github.com/mattarilightcha/fallout2-ce/releases) から `fallout2-japanese-1.10.zip` を落とし、中身を全部 Steam の Fallout 2 のフォルダへ写します（Steam のライブラリで Fallout 2 を右クリック →「管理」→「ローカルファイルを閲覧」）。`fallout2-ce.exe` と `ce.dat` が `fallout2.exe`・`master.dat` と同じ所に並べば合っています。
+2. 同じフォルダの `fallout2.cfg` で、`language=english` を `language=japanese` に、`subtitles=0` を `subtitles=1` に書き換えます。
+3. `fallout2-ce.exe` を起動します。
+
+会話を主人公の性別で切り替える設定（`gender_words=1`）は、zip の `data/config/game#patch.cfg` に入っています。このファイルが無いと、会話に `<男の文^女の文>` の記号がそのまま出ます。
+
+## 改造した所
+
+元のコードからの変更には、どれも `nettoge.com:` の注記を付けています。
+
+- 日本語の文字の描画（UTF-8、ビットマップのフォント `.jfn`、禁則つきの折り返し、英数字も日本語のフォントで描く）: `src/jtext.cc`・`jtext.h`、`text_font.cc`・`word_wrap.cc`・`window.cc`・`window_manager.cc`
+- 会話・キャラクター作成・持ち物・セーブとロード・キャラクター選択・画面下の文の欄の、日本語の字に合わせた行の高さ・位置・折り返しの幅、会話と画面の文の入れ物を広げる: `game_dialog.cc`・`character_editor.cc`・`inventory.cc`・`loadsave.cc`・`character_selector.cc`・`display_monitor.cc`・`message.h`
+- 開発・撮影ビルド（`-DNTG_SHOOT=ON`、`src/ntg_shoot.cc`。`autorun.cc`・`dinput.cc`・`input.cc` などの `#ifdef NTG_SHOOT` の所）。画面を外から操作して撮るための物で、配る `fallout2-ce.exe` には入っていません
+
+## 組み方（Windows・Visual Studio 2022・Win32）
+
+```
+cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_POLICY_VERSION_MINIMUM=3.5 "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded$<$<CONFIG:Debug>:Debug>"
+cmake --build build --config RelWithDebInfo --target fallout2-ce ce-dat-tool
+build\RelWithDebInfo\ce-dat-tool.exe create files\ce.dat build\ce.dat
+```
+
+## 使用許諾
+
+元の Fallout 2: Community Engine と同じ Sustainable Use License 1.0 です（[LICENSE.md](LICENSE.md)、変えていません）。配れるのは、無料で、非営利の目的の時だけです。日本語のフォントは SIL Open Font License 1.1 のフォントから作り、全文を Releases の zip の `ライセンス` フォルダに入れています。Fallout は Bethesda Softworks LLC の商標です。
+
+---
+
+以下は元の Fallout 2: Community Engine の README です。
+
 # Fallout 2: Community Engine
 
 Fallout 2:CE is a fully working re-implementation of the classic Fallout engine, optimized for a hassle-free experience on multiple platforms, including Windows, Mac, iOS, Android, and Linux.  It provides high resolution support, quality-of-life improvements, and dozens upon dozens of bug fixes.

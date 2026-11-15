@@ -280,6 +280,8 @@ bool windowIsValidWindowId(int win);
 Window* windowGetWindow(int win);
 unsigned char* windowGetBuffer(int win);
 Buffer2D windowGetBuffer2D(int win);
+// nettoge.com: the end of the window buffer that holds ptr, or nullptr.
+unsigned char* windowBufferEndContaining(unsigned char* ptr);
 int windowGetAtPoint(int x, int y);
 int windowGetWidth(int win);
 int windowGetHeight(int win);

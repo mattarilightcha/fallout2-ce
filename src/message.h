@@ -9,7 +9,8 @@ namespace fallout {
 
 #define MESSAGE_LIST_ITEM_TEXT_FILTERED 0x01
 
-#define MESSAGE_LIST_ITEM_FIELD_MAX_SIZE 1024
+// nettoge.com: 1024 -> 4096 (UTF-8 Japanese uses 3 bytes per character).
+#define MESSAGE_LIST_ITEM_FIELD_MAX_SIZE 4096
 
 // CE: Working with standard message lists is tricky in Sfall. Many message
 // lists are initialized only for the duration of appropriate modal window. This

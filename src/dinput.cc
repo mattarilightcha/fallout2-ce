@@ -57,6 +57,11 @@ bool mouseDeviceInitMode()
     // "Absolute mode" means cursor position is controlled by the OS, and we read it directly.
     // Mouse sensitivity settings can only apply in relative mode.
 
+#ifdef NTG_SHOOT
+    // nettoge.com shoot build never takes the real mouse.
+    mouseRelativeMode = false;
+    return true;
+#else
     bool wantsRelativeMode = gProgramIsActive && (screenIsExclusiveFullscreen() || settings.screen.mouse_lock);
 
     if (wantsRelativeMode) {
@@ -71,6 +76,7 @@ bool mouseDeviceInitMode()
     mouseRelativeMode = false;
     mouseDeviceRefreshWindowMapping();
     return true;
+#endif
 }
 
 // 0x4E04E8

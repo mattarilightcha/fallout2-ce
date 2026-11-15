@@ -5,12 +5,15 @@
 #include <string.h>
 
 #include <algorithm>
+#include <vector>
 
 #include "color.h"
 #include "db.h"
+#include "jtext.h"
 #include "debug.h"
 #include "memory_manager.h"
 #include "settings.h"
+#include "text_font.h"
 
 // The maximum number of interface fonts.
 #define INTERFACE_FONT_MAX (16)
@@ -126,6 +129,50 @@ void interfaceFontDrawTextScaled2D(const Buffer2D& dest, int x, int y, const cha
         return;
     }
 
+    // nettoge.com: Japanese text. The scaled drawing below reads the game's own
+    // glyphs byte by byte. Draw the string unscaled through the Japanese text
+    // layer (the current font) on a copy of the destination pixels, then copy
+    // the pixels the text changed into the destination, scaled (nearest).
+    if (jtext_active()) {
+        float factor = std::max(scale, 0.01f);
+        int width = fontGetStringWidth(string) + 2;
+        int height = fontGetLineHeight() + 8;
+        std::vector<unsigned char> before(width * height);
+        for (int ty = 0; ty < height; ty++) {
+            for (int tx = 0; tx < width; tx++) {
+                int dx = x + static_cast<int>(tx * factor);
+                int dy = y + static_cast<int>(ty * factor);
+                bool inside = dx >= 0 && dx < dest.width && dy >= 0 && dy < dest.height;
+                before[ty * width + tx] = inside ? dest.data[dy * dest.width + dx] : 0;
+            }
+        }
+
+        std::vector<unsigned char> after(before);
+        fontDrawText(after.data(), string, width, width, color);
+
+        int scaledWidth = static_cast<int>(lround(width * factor));
+        int scaledHeight = static_cast<int>(lround(height * factor));
+        for (int oy = 0; oy < scaledHeight; oy++) {
+            int dy = y + oy;
+            if (dy < 0 || dy >= dest.height) {
+                continue;
+            }
+            int ty = std::min(static_cast<int>(oy / factor), height - 1);
+            for (int ox = 0; ox < scaledWidth; ox++) {
+                int dx = x + ox;
+                if (dx < 0 || dx >= dest.width) {
+                    continue;
+                }
+                int tx = std::min(static_cast<int>(ox / factor), width - 1);
+                unsigned char pixel = after[ty * width + tx];
+                if (pixel != before[ty * width + tx]) {
+                    dest.data[dy * dest.width + dx] = pixel;
+                }
+            }
+        }
+        return;
+    }
+
     interfaceFontDrawScaledImpl(dest, x, y, string, color, std::max(scale, 0.01f));
 }
 
@@ -133,6 +180,11 @@ int interfaceFontGetStringWidthScaled(const char* string, ColorWithFlags color, 
 {
     if (!gInterfaceFontsInitialized || string == nullptr || *string == '\0') {
         return 0;
+    }
+
+    // nettoge.com: Japanese text (see interfaceFontDrawTextScaled2D).
+    if (jtext_active()) {
+        return static_cast<int>(lround(fontGetStringWidth(string) * std::max(scale, 0.01f)));
     }
 
     return interfaceFontGetScaledWidthImpl(string, color, std::max(scale, 0.01f));

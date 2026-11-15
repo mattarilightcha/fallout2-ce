@@ -153,6 +153,18 @@ constexpr int kPartySlotImageHeight = 139;
 #define INVENTORY_SUMMARY_HEIGHT 190
 #define INVENTORY_SUMMARY_MAX_X 440
 
+// nettoge.com: rows of the summary (from INVENTORY_SUMMARY_Y) for the 12 px
+// font. The old layout stepped by fontGetLineHeight() and, with 12 px rows,
+// ran out of the 188 px frame.
+#define INV_SUM_ROW 12
+#define INV_SUM_SEP1 12
+#define INV_SUM_STATS 14
+#define INV_SUM_SEP2 99
+#define INV_SUM_ITEM1 101
+#define INV_SUM_SEP3 138
+#define INV_SUM_ITEM2 140
+#define INV_SUM_TOTAL 176
+
 #define INVENTORY_WINDOW_WIDTH 499
 #define INVENTORY_USE_ON_WINDOW_WIDTH 292
 #define INVENTORY_LOOT_WINDOW_WIDTH 537
@@ -3539,14 +3551,14 @@ static void inventoryRenderSummary()
     bufferDrawLine(windowBuffer,
         pitch,
         summaryX,
-        3 * fontGetLineHeight() / 2 + INVENTORY_SUMMARY_Y,
+        INV_SUM_SEP1 + INVENTORY_SUMMARY_Y,
         summaryMaxX,
-        3 * fontGetLineHeight() / 2 + INVENTORY_SUMMARY_Y,
+        INV_SUM_SEP1 + INVENTORY_SUMMARY_Y,
         COLOR_GREEN);
 
     MessageListItem messageListItem;
 
-    int offset = pitch * 2 * fontGetLineHeight() + pitch * INVENTORY_SUMMARY_Y + summaryX;
+    int offset = pitch * INV_SUM_STATS + pitch * INVENTORY_SUMMARY_Y + summaryX;
     for (Stat stat = STAT_FIRST; stat < PRIMARY_STAT_COUNT; stat++) {
         messageListItem.num = stat;
         if (messageListGetItem(&gInventoryMessageList, &messageListItem)) {
@@ -3555,17 +3567,18 @@ static void inventoryRenderSummary()
 
         int value = critterGetStat(_stack[0], stat);
         snprintf(formattedText, sizeof(formattedText), "%d", value);
-        fontDrawText(windowBuffer + offset + 24, formattedText, 80, pitch, COLOR_GREEN);
+        fontDrawText(windowBuffer + offset + 26, formattedText, 80, pitch, COLOR_GREEN);
 
-        offset += pitch * fontGetLineHeight();
+        offset += pitch * INV_SUM_ROW;
     }
 
-    offset -= pitch * 7 * fontGetLineHeight();
+    offset -= pitch * 7 * INV_SUM_ROW;
 
     for (int index = 0; index < 7; index += 1) {
         messageListItem.num = 7 + index;
         if (messageListGetItem(&gInventoryMessageList, &messageListItem)) {
-            fontDrawText(windowBuffer + offset + 40, messageListItem.text, 80, pitch, COLOR_GREEN);
+            fontDrawText(windowBuffer + offset + 42, messageListItem.text, 100, // nettoge.com: was + 40, 80 px
+                pitch, COLOR_GREEN);
         }
 
         if (summaryStats2[index] == STAT_INVALID) {
@@ -3578,13 +3591,14 @@ static void inventoryRenderSummary()
             snprintf(formattedText, sizeof(formattedText), format, value1, value2);
         }
 
-        fontDrawText(windowBuffer + offset + 104, formattedText, 80, pitch, COLOR_GREEN);
+        // nettoge.com: right-aligned to the frame, the 12 px names are wider.
+        fontDrawText(windowBuffer + offset + (summaryMaxX - summaryX) - fontGetStringWidth(formattedText), formattedText, 80, pitch, COLOR_GREEN);
 
-        offset += pitch * fontGetLineHeight();
+        offset += pitch * INV_SUM_ROW;
     }
 
-    bufferDrawLine(windowBuffer, pitch, summaryX, 18 * fontGetLineHeight() / 2 + 48, summaryMaxX, 18 * fontGetLineHeight() / 2 + 48, COLOR_GREEN);
-    bufferDrawLine(windowBuffer, pitch, summaryX, 26 * fontGetLineHeight() / 2 + 48, summaryMaxX, 26 * fontGetLineHeight() / 2 + 48, COLOR_GREEN);
+    bufferDrawLine(windowBuffer, pitch, summaryX, INV_SUM_SEP2 + INVENTORY_SUMMARY_Y, summaryMaxX, INV_SUM_SEP2 + INVENTORY_SUMMARY_Y, COLOR_GREEN);
+    bufferDrawLine(windowBuffer, pitch, summaryX, INV_SUM_SEP3 + INVENTORY_SUMMARY_Y, summaryMaxX, INV_SUM_SEP3 + INVENTORY_SUMMARY_Y, COLOR_GREEN);
 
     Object* itemsInHands[2] = {
         gInventoryLeftHandItem,
@@ -3606,9 +3620,11 @@ static void inventoryRenderSummary()
         HIT_MODE_KICK,
     };
 
-    offset += pitch * fontGetLineHeight();
+    offset += pitch * INV_SUM_ROW;
 
     for (int index = 0; index < 2; index += 1) {
+        // nettoge.com: each hand starts at a fixed row.
+        offset = pitch * (INVENTORY_SUMMARY_Y + (index == 0 ? INV_SUM_ITEM1 : INV_SUM_ITEM2)) + summaryX;
         Object* item = itemsInHands[index];
         if (item == nullptr) {
             formattedText[0] = '\0';
@@ -3619,7 +3635,7 @@ static void inventoryRenderSummary()
                 fontDrawText(windowBuffer + offset, messageListItem.text, 120, pitch, COLOR_GREEN);
             }
 
-            offset += pitch * fontGetLineHeight();
+            offset += pitch * INV_SUM_ROW;
 
             // Unarmed dmg:
             messageListItem.num = 24;
@@ -3655,14 +3671,14 @@ static void inventoryRenderSummary()
 
             fontDrawText(windowBuffer + offset, formattedText, 120, pitch, COLOR_GREEN);
 
-            offset += 3 * pitch * fontGetLineHeight();
+            offset += 3 * pitch * INV_SUM_ROW;
             continue;
         }
 
         const char* itemName = itemGetName(item);
         fontDrawText(windowBuffer + offset, itemName, 140, pitch, COLOR_GREEN);
 
-        offset += pitch * fontGetLineHeight();
+        offset += pitch * INV_SUM_ROW;
 
         ItemType itemType = itemGetType(item);
         if (itemType != ITEM_TYPE_WEAPON) {
@@ -3674,7 +3690,7 @@ static void inventoryRenderSummary()
                 }
             }
 
-            offset += 3 * pitch * fontGetLineHeight();
+            offset += 3 * pitch * INV_SUM_ROW;
             continue;
         }
 
@@ -3753,7 +3769,7 @@ static void inventoryRenderSummary()
             fontDrawText(windowBuffer + offset, formattedText, 140, pitch, COLOR_GREEN);
         }
 
-        offset += pitch * fontGetLineHeight();
+        offset += pitch * INV_SUM_ROW;
 
         if (ammoGetCapacity(item) > 0) {
             const ProtoId ammoTypeProtoId = weaponGetAmmoTypeProtoId(item);
@@ -3783,10 +3799,12 @@ static void inventoryRenderSummary()
             fontDrawText(windowBuffer + offset, formattedText, 140, pitch, COLOR_GREEN);
         }
 
-        offset += 2 * pitch * fontGetLineHeight();
+        offset += 2 * pitch * INV_SUM_ROW;
     }
 
     // Total wt:
+    // nettoge.com: right under the second hand, inside the 188 px frame.
+    offset = pitch * (INVENTORY_SUMMARY_Y + INV_SUM_TOTAL) + summaryX;
     messageListItem.num = 20;
     if (messageListGetItem(&gInventoryMessageList, &messageListItem)) {
         if (ProtoId(_stack[0]).objectType() == OBJ_TYPE_CRITTER) {

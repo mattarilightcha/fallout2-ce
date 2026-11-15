@@ -33,6 +33,7 @@
 #include "interface.h"
 #include "inventory.h"
 #include "item.h"
+#include "jtext.h"
 #include "kb.h"
 #include "loadsave.h"
 #include "map.h"
@@ -225,6 +226,9 @@ int gameInitWithOptions(const char* windowTitle, bool isMapper, int font, Window
     interfaceFontsInit();
     fontManagerAdd(&gModernFontManager);
     fontSetCurrent(font);
+
+    // nettoge.com: Japanese text layer (see jtext.h).
+    jtext_init(settings.system.language.c_str());
 
     screenshotHandlerConfigure(KEY_F12, gameTakeScreenshot);
 

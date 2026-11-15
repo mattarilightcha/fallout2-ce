@@ -14,6 +14,12 @@ namespace fallout {
 // 0x4139C0 autorun_mutex_create
 bool autorunMutexCreate()
 {
+#ifdef NTG_SHOOT
+    // nettoge.com: the shoot build runs beside the game and the Fallout 1 shoot
+    // build, which hold the same mutex.
+    return true;
+#endif
+
 #ifdef _WIN32
     gInterplayGenericAutorunMutex = CreateMutexA(nullptr, FALSE, "InterplayGenericAutorunMutex");
     if (GetLastError() == ERROR_ALREADY_EXISTS) {

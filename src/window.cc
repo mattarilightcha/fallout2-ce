@@ -11,6 +11,7 @@
 #include "game.h"
 #include "input.h"
 #include "interpreter_lib.h"
+#include "jtext.h"
 #include "kb.h"
 #include "memory_manager.h"
 #include "mouse.h"
@@ -1136,6 +1137,34 @@ char** windowWordWrap(char* string, int maxLength, int indent, int* substringLis
 
     char** substringList = nullptr;
     int substringListLength = 0;
+
+    // nettoge.com: Japanese line breaking (kinsoku, no spaces needed).
+    if (jtext_active()) {
+        char* pos = string;
+        int first = indent;
+        while (*pos != '\0') {
+            int next;
+            int lineLength = jtext_fit(pos, maxLength - first, &next);
+            if (next <= 0) {
+                next = 1;
+                lineLength = 1;
+            }
+            first = 0;
+
+            if (substringList != nullptr) {
+                substringList = (char**)internal_realloc_safe(substringList, sizeof(*substringList) * (substringListLength + 1), __FILE__, __LINE__);
+            } else {
+                substringList = (char**)internal_malloc_safe(sizeof(*substringList), __FILE__, __LINE__);
+            }
+            char* substring = (char*)internal_malloc_safe(lineLength + 1, __FILE__, __LINE__);
+            strncpy(substring, pos, lineLength);
+            substring[lineLength] = '\0';
+            substringList[substringListLength++] = substring;
+            pos += next;
+        }
+        *substringListLengthPtr = substringListLength;
+        return substringList;
+    }
 
     char* start = string;
     char* pch = string;
