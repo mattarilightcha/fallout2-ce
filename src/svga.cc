@@ -181,6 +181,14 @@ int _GNW95_init_window(int width, int height, bool fullscreen, int scale)
             windowFlags |= SDL_WINDOW_FULLSCREEN;
         }
 
+#ifdef NTG_SHOOT
+        // nettoge.com shoot build: no window on the desktop (FO_SHOOT_SHOW=1 shows it).
+        if (SDL_getenv("FO_SHOOT_SHOW") == nullptr) {
+            windowFlags &= ~SDL_WINDOW_FULLSCREEN;
+            windowFlags |= SDL_WINDOW_HIDDEN;
+        }
+#endif
+
         gSdlWindow = SDL_CreateWindow(gProgramWindowTitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width * scale, height * scale, windowFlags);
         if (gSdlWindow == nullptr) {
             return -1;

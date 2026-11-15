@@ -95,6 +95,10 @@ static void audioEngineMixin(void* userData, Uint8* stream, int length)
 
 bool audioEngineInit()
 {
+#ifdef NTG_SHOOT
+    // nettoge.com shoot build is silent unless SDL_AUDIODRIVER is given.
+    SDL_setenv("SDL_AUDIODRIVER", "dummy", 0);
+#endif
     SDL_AudioSpec desiredSpec;
     desiredSpec.freq = 22050;
     desiredSpec.format = AUDIO_S16;

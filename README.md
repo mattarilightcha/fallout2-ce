@@ -1,3 +1,39 @@
+# Fallout 2 Community Edition 日本語化（nettoge.com の改造版）
+
+**This software has been modified by nettoge.com.** This is a fork of [Fallout 2 Community Edition](https://github.com/alexbatalov/fallout2-ce) by alexbatalov that draws Japanese text. It is not made or endorsed by the original author, Bethesda Softworks or Interplay.
+
+Fallout 2（Steam 版）を日本語で遊ぶための、fallout2-ce の改造版です。日本語の文・フォント・画面の絵は [Releases](https://github.com/mattarilightcha/fallout2-ce/releases) の zip に入っています。入れ方と解説は [nettoge.com](https://nettoge.com/) の記事にあります。
+
+## 入れ方
+
+1. [Releases](https://github.com/mattarilightcha/fallout2-ce/releases) から `fallout2-japanese-1.00.zip` を落とし、中身を全部 Steam の Fallout 2 のフォルダへ写します（Steam のライブラリで Fallout 2 を右クリック →「管理」→「ローカルファイルを閲覧」）。`fallout2-ce.exe` が `fallout2.exe`・`master.dat` と同じ所に並べば合っています。
+2. 同じフォルダの `fallout2.cfg` で、`language=english` を `language=japanese` に、`subtitles=0` を `subtitles=1` に書き換えます。
+3. 同じフォルダの `ddraw.ini` の `[Misc]` の行のすぐ下に `DialogGenderWords=1` を足します。無いと、会話に `<男の文^女の文>` の記号がそのまま出ます。
+4. `fallout2-ce.exe` を起動します。起動しない時は Microsoft Visual C++ 再頒布可能パッケージ（x86）を入れてください。
+
+## 改造した所
+
+元のコードからの変更には、どれも `nettoge.com:` の注記を付けています。
+
+- 日本語の文字の描画（UTF-8、ビットマップのフォント `.jfn`、禁則つきの折り返し、英数字も日本語のフォントで描く）: `src/jtext.cc`・`jtext.h`、`text_font.cc`・`word_wrap.cc`・`window.cc`・`window_manager.cc`
+- 会話・キャラクター作成・持ち物・セーブとロード・キャラクター選択・画面下の文の欄の、日本語の字に合わせた行の高さ・位置・折り返しの幅、会話と画面の文の入れ物を広げる: `game_dialog.cc`・`character_editor.cc`・`inventory.cc`・`loadsave.cc`・`character_selector.cc`・`display_monitor.cc`・`message.h`
+- 開発・撮影ビルド（`-DNTG_SHOOT=ON`、`src/ntg_shoot.cc`。`autorun.cc`・`game_movie.cc`・`input.cc` などの `#ifdef NTG_SHOOT` の所）。画面を外から操作して撮るための物で、配る `fallout2-ce.exe` には入っていません
+
+## 組み方（Windows・Visual Studio 2022・Win32）
+
+```
+cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+cmake --build build --config RelWithDebInfo
+```
+
+## 使用許諾
+
+元の fallout2-ce と同じ Sustainable Use License 1.0 です（[LICENSE.md](LICENSE.md)、変えていません）。配れるのは、無料で、非営利の目的の時だけです。日本語のフォントは SIL Open Font License 1.1 のフォントから作り、全文を Releases の zip の `ライセンス` フォルダに入れています。Fallout は Bethesda Softworks LLC の商標です。
+
+---
+
+以下は元の fallout2-ce の README です。
+
 # Fallout 2 Community Edition
 
 Fallout 2 Community Edition is a fully working re-implementation of Fallout 2, with the same original gameplay, engine bugfixes, and some quality of life improvements, that works (mostly) hassle-free on multiple platforms.

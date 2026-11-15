@@ -5,6 +5,7 @@
 
 #include "color.h"
 #include "db.h"
+#include "jtext.h"
 #include "memory.h"
 #include "platform_compat.h"
 
@@ -285,6 +286,9 @@ void fontSetCurrent(int font)
         gCurrentFont = font;
 
         fontManager->setCurrentProc(font);
+
+        // nettoge.com: Japanese text layer (wraps the functions set above).
+        jtext_on_font(font, fontManager);
     }
 }
 

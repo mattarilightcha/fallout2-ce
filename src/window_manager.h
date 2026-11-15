@@ -172,6 +172,8 @@ void windowRefreshAll(Rect* rect);
 void _win_get_mouse_buf(unsigned char* a1);
 Window* windowGetWindow(int win);
 unsigned char* windowGetBuffer(int win);
+// nettoge.com: the end of the window buffer that holds ptr, or nullptr.
+unsigned char* windowBufferEndContaining(unsigned char* ptr);
 int windowGetAtPoint(int x, int y);
 int windowGetWidth(int win);
 int windowGetHeight(int win);

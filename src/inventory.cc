@@ -138,6 +138,18 @@ namespace fallout {
 #define INVENTORY_SUMMARY_Y 44
 #define INVENTORY_SUMMARY_MAX_X 440
 
+// nettoge.com: rows of the summary (from INVENTORY_SUMMARY_Y) for the 12 px
+// font. The old layout stepped by fontGetLineHeight() and, with 12 px rows,
+// ran out of the 188 px frame.
+#define INV_SUM_ROW 12
+#define INV_SUM_SEP1 12
+#define INV_SUM_STATS 14
+#define INV_SUM_SEP2 99
+#define INV_SUM_ITEM1 101
+#define INV_SUM_SEP3 138
+#define INV_SUM_ITEM2 140
+#define INV_SUM_TOTAL 176
+
 #define INVENTORY_WINDOW_WIDTH 499
 #define INVENTORY_USE_ON_WINDOW_WIDTH 292
 #define INVENTORY_LOOT_WINDOW_WIDTH 537
@@ -2908,14 +2920,14 @@ static void inventoryRenderSummary()
     bufferDrawLine(windowBuffer,
         INVENTORY_WINDOW_WIDTH,
         INVENTORY_SUMMARY_X,
-        3 * fontGetLineHeight() / 2 + INVENTORY_SUMMARY_Y,
+        INV_SUM_SEP1 + INVENTORY_SUMMARY_Y,
         INVENTORY_SUMMARY_MAX_X,
-        3 * fontGetLineHeight() / 2 + INVENTORY_SUMMARY_Y,
+        INV_SUM_SEP1 + INVENTORY_SUMMARY_Y,
         _colorTable[992]);
 
     MessageListItem messageListItem;
 
-    int offset = INVENTORY_WINDOW_WIDTH * 2 * fontGetLineHeight() + INVENTORY_WINDOW_WIDTH * INVENTORY_SUMMARY_Y + INVENTORY_SUMMARY_X;
+    int offset = INVENTORY_WINDOW_WIDTH * INV_SUM_STATS + INVENTORY_WINDOW_WIDTH * INVENTORY_SUMMARY_Y + INVENTORY_SUMMARY_X;
     for (int stat = 0; stat < PRIMARY_STAT_COUNT; stat++) {
         messageListItem.num = stat;
         if (messageListGetItem(&gInventoryMessageList, &messageListItem)) {
@@ -2924,17 +2936,18 @@ static void inventoryRenderSummary()
 
         int value = critterGetStat(_stack[0], stat);
         snprintf(formattedText, sizeof(formattedText), "%d", value);
-        fontDrawText(windowBuffer + offset + 24, formattedText, 80, INVENTORY_WINDOW_WIDTH, _colorTable[992]);
+        fontDrawText(windowBuffer + offset + 26, formattedText, 80, INVENTORY_WINDOW_WIDTH, _colorTable[992]);
 
-        offset += INVENTORY_WINDOW_WIDTH * fontGetLineHeight();
+        offset += INVENTORY_WINDOW_WIDTH * INV_SUM_ROW;
     }
 
-    offset -= INVENTORY_WINDOW_WIDTH * 7 * fontGetLineHeight();
+    offset -= INVENTORY_WINDOW_WIDTH * 7 * INV_SUM_ROW;
 
     for (int index = 0; index < 7; index += 1) {
         messageListItem.num = 7 + index;
         if (messageListGetItem(&gInventoryMessageList, &messageListItem)) {
-            fontDrawText(windowBuffer + offset + 40, messageListItem.text, 80, INVENTORY_WINDOW_WIDTH, _colorTable[992]);
+            fontDrawText(windowBuffer + offset + 42, messageListItem.text, 100, // nettoge.com: was + 40, 80 px
+                INVENTORY_WINDOW_WIDTH, _colorTable[992]);
         }
 
         if (summaryStats2[index] == -1) {
@@ -2947,13 +2960,14 @@ static void inventoryRenderSummary()
             snprintf(formattedText, sizeof(formattedText), format, value1, value2);
         }
 
-        fontDrawText(windowBuffer + offset + 104, formattedText, 80, INVENTORY_WINDOW_WIDTH, _colorTable[992]);
+        // nettoge.com: right-aligned to the frame, the 12 px names are wider.
+        fontDrawText(windowBuffer + offset + (INVENTORY_SUMMARY_MAX_X - INVENTORY_SUMMARY_X) - fontGetStringWidth(formattedText), formattedText, 80, INVENTORY_WINDOW_WIDTH, _colorTable[992]);
 
-        offset += INVENTORY_WINDOW_WIDTH * fontGetLineHeight();
+        offset += INVENTORY_WINDOW_WIDTH * INV_SUM_ROW;
     }
 
-    bufferDrawLine(windowBuffer, INVENTORY_WINDOW_WIDTH, INVENTORY_SUMMARY_X, 18 * fontGetLineHeight() / 2 + 48, INVENTORY_SUMMARY_MAX_X, 18 * fontGetLineHeight() / 2 + 48, _colorTable[992]);
-    bufferDrawLine(windowBuffer, INVENTORY_WINDOW_WIDTH, INVENTORY_SUMMARY_X, 26 * fontGetLineHeight() / 2 + 48, INVENTORY_SUMMARY_MAX_X, 26 * fontGetLineHeight() / 2 + 48, _colorTable[992]);
+    bufferDrawLine(windowBuffer, INVENTORY_WINDOW_WIDTH, INVENTORY_SUMMARY_X, INV_SUM_SEP2 + INVENTORY_SUMMARY_Y, INVENTORY_SUMMARY_MAX_X, INV_SUM_SEP2 + INVENTORY_SUMMARY_Y, _colorTable[992]);
+    bufferDrawLine(windowBuffer, INVENTORY_WINDOW_WIDTH, INVENTORY_SUMMARY_X, INV_SUM_SEP3 + INVENTORY_SUMMARY_Y, INVENTORY_SUMMARY_MAX_X, INV_SUM_SEP3 + INVENTORY_SUMMARY_Y, _colorTable[992]);
 
     Object* itemsInHands[2] = {
         gInventoryLeftHandItem,
@@ -2975,9 +2989,11 @@ static void inventoryRenderSummary()
         HIT_MODE_KICK,
     };
 
-    offset += INVENTORY_WINDOW_WIDTH * fontGetLineHeight();
+    offset += INVENTORY_WINDOW_WIDTH * INV_SUM_ROW;
 
     for (int index = 0; index < 2; index += 1) {
+        // nettoge.com: each hand starts at a fixed row.
+        offset = INVENTORY_WINDOW_WIDTH * (INVENTORY_SUMMARY_Y + (index == 0 ? INV_SUM_ITEM1 : INV_SUM_ITEM2)) + INVENTORY_SUMMARY_X;
         Object* item = itemsInHands[index];
         if (item == nullptr) {
             formattedText[0] = '\0';
@@ -2988,7 +3004,7 @@ static void inventoryRenderSummary()
                 fontDrawText(windowBuffer + offset, messageListItem.text, 120, INVENTORY_WINDOW_WIDTH, _colorTable[992]);
             }
 
-            offset += INVENTORY_WINDOW_WIDTH * fontGetLineHeight();
+            offset += INVENTORY_WINDOW_WIDTH * INV_SUM_ROW;
 
             // Unarmed dmg:
             messageListItem.num = 24;
@@ -3024,14 +3040,14 @@ static void inventoryRenderSummary()
 
             fontDrawText(windowBuffer + offset, formattedText, 120, INVENTORY_WINDOW_WIDTH, _colorTable[992]);
 
-            offset += 3 * INVENTORY_WINDOW_WIDTH * fontGetLineHeight();
+            offset += 3 * INVENTORY_WINDOW_WIDTH * INV_SUM_ROW;
             continue;
         }
 
         const char* itemName = itemGetName(item);
         fontDrawText(windowBuffer + offset, itemName, 140, INVENTORY_WINDOW_WIDTH, _colorTable[992]);
 
-        offset += INVENTORY_WINDOW_WIDTH * fontGetLineHeight();
+        offset += INVENTORY_WINDOW_WIDTH * INV_SUM_ROW;
 
         int itemType = itemGetType(item);
         if (itemType != ITEM_TYPE_WEAPON) {
@@ -3043,7 +3059,7 @@ static void inventoryRenderSummary()
                 }
             }
 
-            offset += 3 * INVENTORY_WINDOW_WIDTH * fontGetLineHeight();
+            offset += 3 * INVENTORY_WINDOW_WIDTH * INV_SUM_ROW;
             continue;
         }
 
@@ -3122,7 +3138,7 @@ static void inventoryRenderSummary()
             fontDrawText(windowBuffer + offset, formattedText, 140, INVENTORY_WINDOW_WIDTH, _colorTable[992]);
         }
 
-        offset += INVENTORY_WINDOW_WIDTH * fontGetLineHeight();
+        offset += INVENTORY_WINDOW_WIDTH * INV_SUM_ROW;
 
         if (ammoGetCapacity(item) > 0) {
             int ammoTypePid = weaponGetAmmoTypePid(item);
@@ -3152,10 +3168,12 @@ static void inventoryRenderSummary()
             fontDrawText(windowBuffer + offset, formattedText, 140, INVENTORY_WINDOW_WIDTH, _colorTable[992]);
         }
 
-        offset += 2 * INVENTORY_WINDOW_WIDTH * fontGetLineHeight();
+        offset += 2 * INVENTORY_WINDOW_WIDTH * INV_SUM_ROW;
     }
 
     // Total wt:
+    // nettoge.com: right under the second hand, inside the 188 px frame.
+    offset = INVENTORY_WINDOW_WIDTH * (INVENTORY_SUMMARY_Y + INV_SUM_TOTAL) + INVENTORY_SUMMARY_X;
     messageListItem.num = 20;
     if (messageListGetItem(&gInventoryMessageList, &messageListItem)) {
         if (PID_TYPE(_stack[0]->pid) == OBJ_TYPE_CRITTER) {

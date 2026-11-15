@@ -64,7 +64,9 @@ namespace fallout {
 
 #define CS_WINDOW_NAME_MID_X (318)
 #define CS_WINDOW_PRIMARY_STAT_MID_X (362)
-#define CS_WINDOW_SECONDARY_STAT_MID_X (379)
+// nettoge.com: moved right for the 12 px font, so that the long derived stat
+// names start after the portrait (x 272) and the values end before the bio.
+#define CS_WINDOW_SECONDARY_STAT_MID_X (390)
 #define CS_WINDOW_BIO_X (438)
 
 typedef enum PremadeCharacter {
@@ -621,8 +623,11 @@ static bool characterSelectorWindowRenderStats()
 
     fontGetCharacterWidth(0x20);
 
+    // nettoge.com: 12 px rows; the blank lines are half a row (CS_GAP) so that
+    // all rows stay inside the frame.
     int vh = fontGetLineHeight();
     int y = 40;
+    const int CS_GAP = vh / 2;
 
     // NAME
     str = objectGetName(gDude);
@@ -632,7 +637,7 @@ static bool characterSelectorWindowRenderStats()
     fontDrawText(gCharacterSelectorWindowBuffer + CS_WINDOW_WIDTH * y + CS_WINDOW_NAME_MID_X - (length / 2), text, 160, CS_WINDOW_WIDTH, _colorTable[992]);
 
     // STRENGTH
-    y += vh + vh + vh;
+    y += vh + vh - 6; // nettoge.com: was 3 rows
 
     value = critterGetStat(gDude, STAT_STRENGTH);
     str = statGetName(STAT_STRENGTH);
@@ -750,7 +755,7 @@ static bool characterSelectorWindowRenderStats()
     length = fontGetStringWidth(text);
     fontDrawText(gCharacterSelectorWindowBuffer + CS_WINDOW_WIDTH * y + CS_WINDOW_PRIMARY_STAT_MID_X, text, length, CS_WINDOW_WIDTH, _colorTable[992]);
 
-    y += vh; // blank line
+    y += CS_GAP; // nettoge.com: blank line, half a row
 
     // HIT POINTS
     y += vh;
@@ -818,7 +823,7 @@ static bool characterSelectorWindowRenderStats()
     length = fontGetStringWidth(text);
     fontDrawText(gCharacterSelectorWindowBuffer + CS_WINDOW_WIDTH * y + CS_WINDOW_SECONDARY_STAT_MID_X, text, length, CS_WINDOW_WIDTH, _colorTable[992]);
 
-    y += vh; // blank line
+    y += CS_GAP; // nettoge.com: blank line, half a row
 
     // SKILLS
     int skills[DEFAULT_TAGGED_SKILLS];

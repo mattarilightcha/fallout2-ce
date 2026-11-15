@@ -321,6 +321,16 @@ void gameMovieFadeOut()
 }
 
 // 0x44EB04
+#ifdef NTG_SHOOT
+// nettoge.com shoot build: mark a movie as seen (MOVIE_VSUIT gives the Pip-Boy).
+void shoot_movie_seen(int movie)
+{
+    if (movie >= 0 && movie < MOVIE_COUNT) {
+        gGameMoviesSeen[movie] = 1;
+    }
+}
+#endif
+
 bool gameMovieIsSeen(int movie)
 {
     return gGameMoviesSeen[movie] == 1;

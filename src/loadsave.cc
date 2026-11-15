@@ -71,6 +71,12 @@ namespace fallout {
 #define LS_WINDOW_WIDTH 640
 #define LS_WINDOW_HEIGHT 480
 
+// nettoge.com: the slot list was laid out for the 10 px font 101 (rows of
+// 10, slots of 34). With the 12 px font the rows are 12 and the slots 36, so
+// that the tenth slot still ends inside the list (y 440).
+#define LS_ROW 12
+#define LS_SLOT_STEP (3 * LS_ROW)
+
 #define LS_PREVIEW_WIDTH 224
 #define LS_PREVIEW_HEIGHT 133
 #define LS_PREVIEW_SIZE ((LS_PREVIEW_WIDTH) * (LS_PREVIEW_HEIGHT))
@@ -554,7 +560,7 @@ int lsgSaveGame(int mode)
                     int mouseY;
                     mouseGetPositionInWindow(gLoadSaveWindow, &mouseX, &mouseY);
 
-                    _slot_cursor = (mouseY - 79) / (3 * fontGetLineHeight() + 4);
+                    _slot_cursor = (mouseY - 79) / LS_SLOT_STEP; // nettoge.com: fixed slot
                     if (_slot_cursor < 0) {
                         _slot_cursor = 0;
                     }
@@ -1058,7 +1064,7 @@ int lsgLoadGame(int mode)
                     int mouseY;
                     mouseGetPositionInWindow(gLoadSaveWindow, &mouseX, &mouseY);
 
-                    int clickedSlot = (mouseY - 79) / (3 * fontGetLineHeight() + 4);
+                    int clickedSlot = (mouseY - 79) / LS_SLOT_STEP; // nettoge.com: fixed slot
                     if (clickedSlot < 0) {
                         clickedSlot = 0;
                     } else if (clickedSlot > 9) {
@@ -2039,7 +2045,7 @@ static void _ShowSlotList(int windowType)
         snprintf(_str, sizeof(_str), "[   %s %.2d:   ]", text, index + 1);
         fontDrawText(gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * y + 55, _str, LS_WINDOW_WIDTH, LS_WINDOW_WIDTH, color);
 
-        y += fontGetLineHeight();
+        y += LS_ROW; // nettoge.com: fixed row
         switch (_LSstatus[index]) {
         case SLOT_STATE_OCCUPIED:
             strcpy(_str, _LSData[index].description);
@@ -2064,7 +2070,7 @@ static void _ShowSlotList(int windowType)
         }
 
         fontDrawText(gLoadSaveWindowBuffer + LS_WINDOW_WIDTH * y + 55, _str, LS_WINDOW_WIDTH, LS_WINDOW_WIDTH, color);
-        y += 2 * fontGetLineHeight() + 4;
+        y += LS_SLOT_STEP - LS_ROW; // nettoge.com: fixed slot
     }
 }
 

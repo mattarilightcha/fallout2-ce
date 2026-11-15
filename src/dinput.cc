@@ -93,7 +93,12 @@ bool keyboardDeviceGetData(KeyboardData* keyboardData)
 // 0x4E070C
 bool mouseDeviceInit()
 {
+#ifdef NTG_SHOOT
+    // nettoge.com shoot build never takes the real mouse.
+    return true;
+#else
     return SDL_SetRelativeMouseMode(SDL_TRUE) == 0;
+#endif
 }
 
 // 0x4E078C

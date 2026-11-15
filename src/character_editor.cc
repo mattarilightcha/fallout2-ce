@@ -26,6 +26,7 @@
 #include "input.h"
 #include "interface.h"
 #include "item.h"
+#include "jtext.h" // nettoge.com: jtext_small()
 #include "kb.h"
 #include "map.h"
 #include "memory.h"
@@ -52,6 +53,17 @@ namespace fallout {
 #define RENDER_ALL_STATS 7
 
 #define EDITOR_WINDOW_WIDTH 640
+
+// nettoge.com: the editor's frames, buttons and hit boxes were laid out for
+// the 10 px font 101. The Japanese font is 12 px with an 11 px glyph box, so
+// the lists step by fixed amounts instead of fontGetLineHeight():
+// ED_ROW  = the old line height + 1, for lists tied to rows in the art
+//           (skills, the perks/karma/kills folder),
+// ED_ROW3 = the old line height + 3 (status, derived stats, traits),
+// ED_LINE = 12 px rows where the frame has room (level box, perk dialog).
+#define ED_ROW 11
+#define ED_ROW3 13
+#define ED_LINE 12
 #define EDITOR_WINDOW_HEIGHT 480
 
 #define NAME_BUTTON_X 9
@@ -1229,7 +1241,7 @@ static int characterEditorWindowInit()
 
     fontSetCurrent(101);
 
-    gCharacterEditorSkillValueAdjustmentSliderY = gCharacterEditorCurrentSkill * (fontGetLineHeight() + 1) + 27;
+    gCharacterEditorSkillValueAdjustmentSliderY = gCharacterEditorCurrentSkill * ED_ROW + 27; // nettoge.com: fixed row
 
     // skills
     skillsGetTagged(gCharacterEditorTempTaggedSkills, NUM_TAGGED_SKILLS);
@@ -2056,6 +2068,9 @@ static void characterEditorDrawFolders()
 
     fontSetCurrent(101);
 
+    // nettoge.com: 11 px rows fixed by the art, 10 px glyphs (see jtext_small).
+    jtext_small(true);
+
     switch (characterEditorWindowSelectedFolder) {
     case EDITOR_FOLDER_PERKS:
         blitBufferToBuffer(gCharacterEditorFrmCopy[EDITOR_GRAPHIC_PERKS_FOLDER_SELECTED],
@@ -2088,6 +2103,8 @@ static void characterEditorDrawFolders()
         debugPrint("\n ** Unknown folder type! **\n");
         break;
     }
+
+    jtext_small(false); // nettoge.com
 }
 
 // 0x434238
@@ -2372,7 +2389,8 @@ static void characterEditorDrawPcStats()
 
     fontSetCurrent(101);
 
-    blitBufferToBuffer(_editorBackgroundFrmImage.getData() + 640 * 280 + 32, 124, 32, 640, gCharacterEditorWindowBuffer + 640 * 280 + 32, 640);
+    // nettoge.com: three 12 px rows need 36 px.
+    blitBufferToBuffer(_editorBackgroundFrmImage.getData() + 640 * 280 + 32, 124, 36, 640, gCharacterEditorWindowBuffer + 640 * 280 + 32, 640);
 
     // LEVEL
     y = 280;
@@ -2389,7 +2407,7 @@ static void characterEditorDrawPcStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 32, stringBuffer, 640, 640, color);
 
     // EXPERIENCE
-    y += fontGetLineHeight() + 1;
+    y += ED_LINE; // nettoge.com: 12 px rows
     if (characterEditorSelectedItem != 8) {
         color = _colorTable[992];
     } else {
@@ -2403,7 +2421,7 @@ static void characterEditorDrawPcStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 32, stringBuffer, 640, 640, color);
 
     // EXP NEEDED TO NEXT LEVEL
-    y += fontGetLineHeight() + 1;
+    y += ED_LINE; // nettoge.com: 12 px rows
     if (characterEditorSelectedItem != 9) {
         color = _colorTable[992];
     } else {
@@ -2656,7 +2674,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 263, t, 640, 640, color);
 
     // Poisoned
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_POISONED) {
         color = critterGetPoison(gDude) != 0 ? _colorTable[32747] : _colorTable[15845];
@@ -2669,7 +2687,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 194, t, 640, 640, color);
 
     // Radiated
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_RADIATED) {
         color = critterGetRadiation(gDude) != 0 ? _colorTable[32747] : _colorTable[15845];
@@ -2682,7 +2700,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 194, t, 640, 640, color);
 
     // Eye Damage
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_EYE_DAMAGE) {
         color = (conditions & DAM_BLIND) ? _colorTable[32747] : _colorTable[15845];
@@ -2695,7 +2713,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 194, t, 640, 640, color);
 
     // Crippled Right Arm
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_CRIPPLED_RIGHT_ARM) {
         color = (conditions & DAM_CRIP_ARM_RIGHT) ? _colorTable[32747] : _colorTable[15845];
@@ -2708,7 +2726,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 194, t, 640, 640, color);
 
     // Crippled Left Arm
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_CRIPPLED_LEFT_ARM) {
         color = (conditions & DAM_CRIP_ARM_LEFT) ? _colorTable[32747] : _colorTable[15845];
@@ -2721,7 +2739,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 194, t, 640, 640, color);
 
     // Crippled Right Leg
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_CRIPPLED_RIGHT_LEG) {
         color = (conditions & DAM_CRIP_LEG_RIGHT) ? _colorTable[32747] : _colorTable[15845];
@@ -2734,7 +2752,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 194, t, 640, 640, color);
 
     // Crippled Left Leg
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_CRIPPLED_LEFT_LEG) {
         color = (conditions & DAM_CRIP_LEG_LEFT) ? _colorTable[32747] : _colorTable[15845];
@@ -2765,7 +2783,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 288, t, 640, 640, color);
 
     // Action Points
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_FIRST_DERIVED_STAT + EDITOR_DERIVED_STAT_ACTION_POINTS) {
         color = _colorTable[32747];
@@ -2781,7 +2799,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 288, t, 640, 640, color);
 
     // Carry Weight
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_FIRST_DERIVED_STAT + EDITOR_DERIVED_STAT_CARRY_WEIGHT) {
         color = _colorTable[32747];
@@ -2797,7 +2815,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 288, t, 640, 640, critterIsEncumbered(gDude) ? _colorTable[31744] : color);
 
     // Melee Damage
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_FIRST_DERIVED_STAT + EDITOR_DERIVED_STAT_MELEE_DAMAGE) {
         color = _colorTable[32747];
@@ -2819,7 +2837,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 288, t, 640, 640, color);
 
     // Damage Resistance
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_FIRST_DERIVED_STAT + EDITOR_DERIVED_STAT_DAMAGE_RESISTANCE) {
         color = _colorTable[32747];
@@ -2835,7 +2853,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 288, t, 640, 640, color);
 
     // Poison Resistance
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_FIRST_DERIVED_STAT + EDITOR_DERIVED_STAT_POISON_RESISTANCE) {
         color = _colorTable[32747];
@@ -2851,7 +2869,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 288, t, 640, 640, color);
 
     // Radiation Resistance
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_FIRST_DERIVED_STAT + EDITOR_DERIVED_STAT_RADIATION_RESISTANCE) {
         color = _colorTable[32747];
@@ -2867,7 +2885,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 288, t, 640, 640, color);
 
     // Sequence
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_FIRST_DERIVED_STAT + EDITOR_DERIVED_STAT_SEQUENCE) {
         color = _colorTable[32747];
@@ -2883,7 +2901,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 288, t, 640, 640, color);
 
     // Healing Rate
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_FIRST_DERIVED_STAT + EDITOR_DERIVED_STAT_HEALING_RATE) {
         color = _colorTable[32747];
@@ -2899,7 +2917,7 @@ static void characterEditorDrawDerivedStats()
     fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 288, t, 640, 640, color);
 
     // Critical Chance
-    y += fontGetLineHeight() + 3;
+    y += ED_ROW3; // nettoge.com: fixed row
 
     if (characterEditorSelectedItem == EDITOR_FIRST_DERIVED_STAT + EDITOR_DERIVED_STAT_CRITICAL_CHANCE) {
         color = _colorTable[32747];
@@ -2969,6 +2987,9 @@ static void characterEditorDrawSkills(int a1)
 
     fontSetCurrent(101);
 
+    // nettoge.com: 11 px rows fixed by the art, 10 px glyphs (see jtext_small).
+    jtext_small(true);
+
     y = 27;
     for (i = 0; i < SKILL_COUNT; i++) {
         if (i == selectedSkill) {
@@ -2993,11 +3014,13 @@ static void characterEditorDrawSkills(int a1)
 
         fontDrawText(gCharacterEditorWindowBuffer + 640 * y + 573, valueString, 640, 640, color);
 
-        y += fontGetLineHeight() + 1;
+        y += ED_ROW; // nettoge.com: fixed row
     }
 
+    jtext_small(false); // nettoge.com
+
     if (!gCharacterEditorIsCreationMode) {
-        y = gCharacterEditorCurrentSkill * (fontGetLineHeight() + 1);
+        y = gCharacterEditorCurrentSkill * ED_ROW; // nettoge.com: fixed row
         gCharacterEditorSkillValueAdjustmentSliderY = y + 27;
 
         blitBufferToBufferTrans(
@@ -5070,7 +5093,7 @@ static void characterEditorHandleInfoButtonPressed(int eventCode)
             if (offset < 0) {
                 offset = 0;
             }
-            characterEditorSelectedItem = offset / (fontGetLineHeight() + 1) + 10;
+            characterEditorSelectedItem = offset / ED_ROW + 10; // nettoge.com: fixed row
         }
         break;
     case 528:
@@ -5124,7 +5147,7 @@ static void characterEditorHandleInfoButtonPressed(int eventCode)
             double mouseY = gCharacterEditorMouseY;
             double fontLineHeight = fontGetLineHeight();
             double y = 353.0;
-            double step = fontGetLineHeight() + 3 + 0.56;
+            double step = ED_ROW3 + 0.56; // nettoge.com: fixed row
             int index;
             for (index = 0; index < 8; index++) {
                 if (mouseY >= y - 4.0 && mouseY <= y + fontLineHeight) {
@@ -5387,7 +5410,7 @@ static void characterEditorDrawOptionalTraits()
 
     traitsSetSelected(gCharacterEditorTempTraits[0], gCharacterEditorTempTraits[1]);
 
-    step = fontGetLineHeight() + 3 + 0.56;
+    step = ED_ROW3 + 0.56; // nettoge.com: fixed row
     y = 353;
     for (i = 0; i < 8; i++) {
         if (i == v0) {
@@ -5982,7 +6005,7 @@ static int perkDialogHandleInput(int count, void (*refreshProc)())
 
     int height = fontGetLineHeight();
     gPerkDialogPreviousCurrentLine = -2;
-    int v16 = height + 2;
+    int v16 = ED_LINE; // nettoge.com: fixed row (the perk list steps by ED_LINE)
 
     int v7 = 0;
 
@@ -6291,7 +6314,7 @@ static int perkDialogDrawPerks()
     v16 += gPerkDialogTopLine;
 
     int y = 43;
-    int yStep = fontGetLineHeight() + 2;
+    int yStep = ED_LINE; // nettoge.com: fixed row
     for (int index = gPerkDialogTopLine; index < v16; index++) {
         int color;
         if (index == gPerkDialogTopLine + gPerkDialogCurrentLine) {
@@ -6518,7 +6541,7 @@ static void perkDialogDrawSkills()
     gPerkDialogOptionCount = 0;
 
     int y = 43;
-    int yStep = fontGetLineHeight() + 2;
+    int yStep = ED_LINE; // nettoge.com: fixed row
 
     for (int skill = 0; skill < SKILL_COUNT; skill++) {
         if (skill != gCharacterEditorTempTaggedSkills[0] && skill != gCharacterEditorTempTaggedSkills[1] && skill != gCharacterEditorTempTaggedSkills[2] && skill != gCharacterEditorTempTaggedSkills[3]) {
@@ -6556,7 +6579,7 @@ static int perkDialogDrawTraits(int a1)
     fontSetCurrent(101);
 
     int y = 43;
-    int yStep = fontGetLineHeight() + 2;
+    int yStep = ED_LINE; // nettoge.com: fixed row
 
     if (a1 != 0) {
         int count = 0;
@@ -6670,7 +6693,7 @@ static int perkDialogDrawCard(int frmId, const char* name, const char* rank, cha
 
     fontSetCurrent(101);
 
-    int yStep = fontGetLineHeight() + 1;
+    int yStep = ED_LINE; // nettoge.com: fixed row
     int y = 70;
 
     short beginnings[WORD_WRAP_MAX_COUNT];
@@ -6853,7 +6876,7 @@ static void characterEditorFolderViewClear()
     v0 = fontGetLineHeight();
 
     gCharacterEditorFolderViewMaxLines = 9;
-    gCharacterEditorFolderViewOffsetY = v0 + 1;
+    gCharacterEditorFolderViewOffsetY = ED_ROW; // nettoge.com: fixed row (13 px rows wrote past the window)
 
     if (characterEditorSelectedItem < 10 || characterEditorSelectedItem >= 43)
         gCharacterEditorFolderViewHighlightedLine = -1;
