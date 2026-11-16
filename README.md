@@ -2,7 +2,7 @@
 
 **This software has been modified by nettoge.com.** This is a fork of [Fallout 2: Community Engine](https://github.com/fallout2-ce/fallout2-ce) (FOR:CE, itself a fork of [Fallout 2 Community Edition](https://github.com/alexbatalov/fallout2-ce) by alexbatalov) that draws Japanese text. It is not made or endorsed by the original authors, Bethesda Softworks or Interplay.
 
-Fallout 2（Steam 版）を日本語で遊ぶための、Fallout 2: Community Engine の改造版です。日本語の文・フォント・画面の絵は [Releases](https://github.com/mattarilightcha/fallout2-ce/releases) の zip に入っています。入れ方と解説は [nettoge.com](https://nettoge.com/) の記事にあります。
+Fallout 2（Steam 版）を日本語で遊ぶための、Fallout 2: Community Engine の改造版です。日本語の文・フォント・画面の絵は [Releases](https://github.com/mattarilightcha/fallout2-ce/releases) の zip に入っています。入れ方と解説は [nettoge.com](https://nettoge.com/fallout2-japanese/) の記事にあります。
 
 1.00 までは alexbatalov/fallout2-ce を元にしていました（枝 `japanese`）。1.10 からは、更新の続いている Fallout 2: Community Engine を元にしています（枝 `japanese-forcece`）。
 
