@@ -31,6 +31,7 @@
 #include "interface.h"
 #include "interpreter_extra.h"
 #include "item.h"
+#include "jtext.h"
 #include "kb.h"
 #include "light.h"
 #include "map.h"
@@ -4328,6 +4329,46 @@ static void inventoryRenderItemDescription(const char* string)
     int pitch = inventoryLayout.windowWidth;
     windowBuffer += pitch * INVENTORY_SUMMARY_Y + inventoryLayout.summaryX;
 
+    // nettoge.com: Japanese line breaking (kinsoku, no spaces needed). The loop
+    // below only breaks at spaces, so a Japanese description stayed on one
+    // line and was cut at the frame.
+    if (jtext_active()) {
+        const char* p = string;
+        int rowHeight = fontGetLineHeight();
+        while (*p != '\0') {
+            _inven_display_msg_line += 1;
+            // the summary is INVENTORY_SUMMARY_HEIGHT px high
+            if ((_inven_display_msg_line + 1) * rowHeight > INVENTORY_SUMMARY_HEIGHT - 2) {
+                debugPrint("\nError: inven_display_msg: out of bounds!");
+                break;
+            }
+
+            int next;
+            int length = jtext_fit(p, 152, &next);
+            if (next <= 0) {
+                unsigned int cp;
+                next = jtext_decode(p, &cp);
+                if (next <= 0) {
+                    next = 1;
+                }
+                length = next;
+            }
+
+            char line[256];
+            if (length > (int)sizeof(line) - 1) {
+                length = (int)sizeof(line) - 1;
+            }
+            memcpy(line, p, length);
+            line[length] = '\0';
+
+            fontDrawText(windowBuffer + pitch * _inven_display_msg_line * rowHeight, line, 152, pitch, COLOR_GREEN);
+            p += next;
+        }
+
+        fontSetCurrent(oldFont);
+        return;
+    }
+
     std::string mutableString(string);
 
     char* c = mutableString.data();
@@ -4446,12 +4487,18 @@ static void inventoryExamineItem(Object* critter, Object* item)
 
     // Draw separator.
     // SFALL: Fix separator position when item name is longer than one line.
+    int separatorY = (_inven_display_msg_line - 1) * lineHeight + lineHeight / 2 + 49;
+    // nettoge.com: the line under the name sits in the middle of the blank row
+    // (the 12 px Japanese glyphs reached the old line).
+    if (jtext_active()) {
+        separatorY = INVENTORY_SUMMARY_Y + _inven_display_msg_line * lineHeight + lineHeight / 2;
+    }
     bufferDrawLine(windowBuffer,
         pitch,
         summaryX,
-        (_inven_display_msg_line - 1) * lineHeight + lineHeight / 2 + 49,
+        separatorY,
         summaryMaxX,
-        (_inven_display_msg_line - 1) * lineHeight + lineHeight / 2 + 49,
+        separatorY,
         COLOR_GREEN);
 
     // Examine item.
